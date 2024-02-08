@@ -1,17 +1,9 @@
 package com.perso.ecomm.playLoad.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import com.perso.ecomm.CustomUser.CustomUserDetails;
+import com.perso.ecomm.user.User;
 
-import java.util.List;
-
-@Setter
-@Getter
-@AllArgsConstructor
-public class UserInfoResponse {
-    private Long id;
-    private String username;
-    private String email;
-    private List<String> roles;
+public record UserInfoResponse(
+        String token,
+        CustomUserDetails user) {
 }

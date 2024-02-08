@@ -27,32 +27,20 @@ public class ReviewController {
 
     @GetMapping("{reviewId}")
     public ResponseEntity<?> getReviewById(@PathVariable Long reviewId) {
-        try {
             Review review = reviewService.getReviewById(reviewId);
             return ResponseEntity.ok(review);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @PostMapping("store")
     public ResponseEntity<?> createReview(@RequestBody ReviewRequest request) {
-        try{
             Review review = reviewService.storeReview(request);
             return ResponseEntity.ok(review);
-        } catch ( EntityNotFoundException e ) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @DeleteMapping("/delete/{reviewId}")
     public ResponseEntity<?> deleteReviewById(@PathVariable Long reviewId) {
-        try{
             reviewService.deleteReview(reviewId);
-            return ResponseEntity.ok("has been deleted");
-        }catch (EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("has been deleted");
     }
 
 }

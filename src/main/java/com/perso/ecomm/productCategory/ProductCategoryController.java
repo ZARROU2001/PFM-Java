@@ -1,5 +1,6 @@
 package com.perso.ecomm.productCategory;
 
+import com.perso.ecomm.exception.RequestValidationException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -8,9 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "product_category")
@@ -40,36 +44,28 @@ public class ProductCategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addNewCategory(@Valid @RequestBody ProductCategory productCategory) {
-        try {
+    public ResponseEntity<?> addNewCategory(@Valid ProductCategory productCategory, BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            throw new RequestValidationException(errors.toString());
+        }
             ProductCategory category = productCategoryService.addNewCategory(productCategory);
             return ResponseEntity.ok(category);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
 
     }
 
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<?> deleteCategory(@PathVariable("categoryId") @Valid Long categoryId) {
-        try {
             productCategoryService.deleteCategory(categoryId);
-            return ResponseEntity.ok("Product category deleted successfully");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Product category deleted successfully");
     }
 
     @PutMapping("/{categoryId}")
     public ResponseEntity<?> updateCategory(
             @PathVariable("categoryId") @Valid Long categoryId,
-            @RequestBody @Valid ProductCategory updatedCategory
+            @Valid ProductCategory updatedCategory
     ) {
-        try {
-            productCategoryService.updateCategory(categoryId, updatedCategory);
-            return ResponseEntity.ok("Product category updated successfully");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+            return ResponseEntity.ok(productCategoryService.updateCategory(categoryId, updatedCategory));
     }
 }

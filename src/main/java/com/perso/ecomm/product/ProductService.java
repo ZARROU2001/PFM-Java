@@ -1,10 +1,10 @@
 package com.perso.ecomm.product;
 
+import com.perso.ecomm.exception.ResourceNotFoundException;
 import com.perso.ecomm.playLoad.request.ProductRequest;
 import com.perso.ecomm.productCategory.ProductCategory;
 import com.perso.ecomm.productCategory.ProductCategoryRepository;
 import com.perso.ecomm.util.FileUploadUtil;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +36,7 @@ public class ProductService {
 
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product with ID + categoryId + not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product with ID + categoryId + not found"));
         productRepository.delete(product);
 
     }
@@ -44,7 +44,7 @@ public class ProductService {
     public Product registerNewProduct(ProductRequest productRequest) throws IOException {
 
         ProductCategory productCategory = productCategoryRepository.findProductCategoriesByCategoryName(productRequest.getCategory())
-                .orElseThrow(() -> new EntityNotFoundException("Category not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not Found"));
 
         FileUploadUtil.saveFile(FOLDER_PATH, productRequest.getImageUrl().getOriginalFilename(), productRequest.getImageUrl());
 
@@ -63,13 +63,13 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateProduct(Long productId, ProductRequest productRequest) throws IOException {
+    public Product updateProduct(Long productId, ProductRequest productRequest) throws IOException {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         " product with id " + productId + " doesn't exist "));
 
         ProductCategory productCategory = productCategoryRepository.findProductCategoriesByCategoryName(productRequest.getCategory())
-                .orElseThrow(() -> new EntityNotFoundException("Category not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not Found"));
 
 
         product.setName(productRequest.getName());
@@ -79,6 +79,7 @@ public class ProductService {
         product.setCategory(productCategory);
         FileUploadUtil.saveFile(FOLDER_PATH, productRequest.getImageUrl().getOriginalFilename(), productRequest.getImageUrl());
         product.setImageUrl("http://localhost:8080/images/" + productRequest.getImageUrl().getOriginalFilename());
+        return product;
     }
 
     public byte[] getImage(Long id) throws IOException {

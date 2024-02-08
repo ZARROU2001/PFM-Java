@@ -2,6 +2,9 @@ package com.perso.ecomm.productCategory;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +26,7 @@ public class ProductCategory {
     private Long categoryId;
 
     @Column(nullable = false,unique = true)
+    @NotNull(message = "Name cannot be blank")
     private String categoryName;
 
     public ProductCategory() {

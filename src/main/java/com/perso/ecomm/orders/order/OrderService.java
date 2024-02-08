@@ -1,5 +1,6 @@
 package com.perso.ecomm.orders.order;
 
+import com.perso.ecomm.exception.ResourceNotFoundException;
 import com.perso.ecomm.orders.orderItem.OrderItem;
 import com.perso.ecomm.orders.orderItem.OrderItemService;
 import com.perso.ecomm.playLoad.request.OrderRequest;
@@ -32,7 +33,7 @@ public class OrderService {
     public Order getOrderById(Long orderId) {
 
         return orderRepository.findById(orderId).orElseThrow(
-                () -> new EntityNotFoundException("There's no order with id :" + orderId)
+                () -> new ResourceNotFoundException("There's no order with id :" + orderId)
         );
     }
 
@@ -40,18 +41,14 @@ public class OrderService {
     public Order saveOrder(OrderRequest orderRequest) {
 
         User user = userRepository.findById(orderRequest.getUserId()).orElseThrow(
-                () -> new EntityNotFoundException("There's no user with id : " + orderRequest.getUserId())
+                () -> new ResourceNotFoundException("There's no user with id : " + orderRequest.getUserId())
         );
 
         List<OrderItem> orderItems;
-        try{
-            orderItems = orderItemService.fromProductIdsToListOrderItem(
-                    orderRequest.getProductIds(),
-                    orderRequest.getQuantities()
-            );
-        }catch (EntityNotFoundException e){
-            throw new EntityNotFoundException(e.getMessage());
-        }
+        orderItems = orderItemService.fromProductIdsToListOrderItem(
+                orderRequest.getProductIds(),
+                orderRequest.getQuantities()
+        );
 
         Order order = new Order();
         order.setUser(user);
@@ -73,7 +70,7 @@ public class OrderService {
     public Order changeOrderStatus(Long orderId, String orderStatus) {
 
         Order order = orderRepository.findById(orderId).orElseThrow(
-                () -> new EntityNotFoundException("There's no order with id :" + orderId)
+                () -> new ResourceNotFoundException("There's no order with id :" + orderId)
         );
         order.setStatus(OrderStatus.valueOf(orderStatus.toUpperCase()));
         return order;
@@ -83,7 +80,7 @@ public class OrderService {
     public void deleteOrder(Long orderId) {
 
         orderRepository.findById(orderId).orElseThrow(
-                () -> new EntityNotFoundException("There's no order with id :" + orderId)
+                () -> new ResourceNotFoundException("There's no order with id :" + orderId)
         );
         orderRepository.deleteById(orderId);
 

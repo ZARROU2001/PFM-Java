@@ -1,5 +1,6 @@
 package com.perso.ecomm.review;
 
+import com.perso.ecomm.exception.ResourceNotFoundException;
 import com.perso.ecomm.playLoad.request.ReviewRequest;
 import com.perso.ecomm.product.Product;
 import com.perso.ecomm.product.ProductRepository;
@@ -29,16 +30,16 @@ public class ReviewService {
 
     public Review getReviewById(Long reviewId) {
         return reviewRepository.findById(reviewId).orElseThrow(
-                () -> new EntityNotFoundException("review with id:" + reviewId)
+                () -> new ResourceNotFoundException("review with id:" + reviewId)
         );
     }
 
     public Review storeReview(ReviewRequest request) {
         Product product = productRepository.findById(request.getProductId()).orElseThrow(
-                () -> new EntityNotFoundException("product with id : " + request.getProductId())
+                () -> new ResourceNotFoundException("product with id : " + request.getProductId())
         );
         User user = userRepository.findById(request.getUserId()).orElseThrow(
-                () -> new EntityNotFoundException("user with id :" + request.getUserId())
+                () -> new ResourceNotFoundException("user with id :" + request.getUserId())
         );
         return reviewRepository.save(
                 new Review(
@@ -52,7 +53,7 @@ public class ReviewService {
 
     public void deleteReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(
-                () -> new EntityNotFoundException("review with id :" + reviewId)
+                () -> new ResourceNotFoundException("review with id :" + reviewId)
         );
         reviewRepository.delete(review);
     }

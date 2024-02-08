@@ -27,7 +27,10 @@ public class User {
     private Long id;
 
     @Column(nullable = false)
-    private String fullName;
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
 
     @Column(nullable = false)
     private String username;
@@ -48,10 +51,12 @@ public class User {
     public User(
             String email,
             String password,
-            String fullName,
+            String firstName,
+            String lastName,
             String username,
             String imageUrl) {
-        this.fullName = fullName;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.username = username;
         this.email = email;
         this.password = password;

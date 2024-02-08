@@ -34,34 +34,20 @@ public class OrderController {
 
     @PutMapping("/{orderId}")
     public ResponseEntity<?> changeOrderStatus(@PathVariable Long orderId, String orderStatus) {
-        try{
             Order order = orderService.changeOrderStatus(orderId, orderStatus);
             return ResponseEntity.ok(order);
-        } catch ( EntityNotFoundException e ) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @PostMapping("store")
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest order) {
-        try {
             Order savedOrder = orderService.saveOrder(order);
             return ResponseEntity.ok(savedOrder);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
-        try {
             orderService.deleteOrder(orderId);
-            return ResponseEntity.ok("deleted successfully");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-
-
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Order with id : %d deleted successfully".formatted(orderId));
     }
 
 

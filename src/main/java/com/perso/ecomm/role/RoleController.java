@@ -25,12 +25,8 @@ public class RoleController {
 
     @PostMapping
     public ResponseEntity<?> postAuth(Role role){
-        try{
             Role role1 = roleService.register(role);
             return ResponseEntity.ok(role1);
-        }catch (EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
 
     }
 

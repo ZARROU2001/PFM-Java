@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,21 +46,9 @@ public class ProductController {
     }
 
     @DeleteMapping(path = "/{productId}")
-    public ResponseEntity<?> deleteProduct(@PathVariable("productId") @Valid Long productId, BindingResult result) {
-
-        if (result.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-        }
-
-        try {
+    public ResponseEntity<?> deleteProduct(@PathVariable("productId") @Valid Long productId) {
             productService.deleteProduct(productId);
-            return ResponseEntity.ok("Product deleted successfully");
-        }catch (EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Product deleted successfully");
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
@@ -71,15 +60,8 @@ public class ProductController {
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-
-        try{
             Product a = productService.registerNewProduct(productRequest);
             return ResponseEntity.ok(a);
-        }catch (EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(e.getMessage());
-        }
 
 
     }
@@ -96,12 +78,8 @@ public class ProductController {
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-        try{
-            productService.updateProduct(productId, productRequest);
-            return ResponseEntity.ok("product updated successfully");
-        }catch(EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+            Product product = productService.updateProduct(productId, productRequest);
+            return ResponseEntity.ok(product);
 
     }
 

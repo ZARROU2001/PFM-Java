@@ -1,21 +1,22 @@
 package com.perso.ecomm.user;
 
 
+import com.perso.ecomm.exception.RequestValidationException;
 import com.perso.ecomm.playLoad.request.LoginRequest;
 import com.perso.ecomm.playLoad.request.SignupRequest;
 import com.perso.ecomm.playLoad.request.UserUpdateRequest;
 import com.perso.ecomm.playLoad.request.changePasswordRequest;
-import jakarta.persistence.EntityNotFoundException;
+import com.perso.ecomm.playLoad.response.UserInfoResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,14 +28,10 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
 
 
-
-
-    public UserController(UserService userService, UserRepository userRepository) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -56,38 +53,26 @@ public class UserController {
 
     @DeleteMapping(path = "{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable("userId") Long userId) {
-        try{
-            userService.deleteUser(userId);
-            return ResponseEntity.ok("User with id : " + userId + "has deleted");
-        }catch (EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        userService.deleteUser(userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User with id : " + userId + "has deleted");
 
     }
 
     @PutMapping(path = "change_role/{userId}")
     public ResponseEntity<?> changeRoleOfUser(@PathVariable Long userId, String role) {
-        try {
-            userService.changeRole(userId, role);
-            return ResponseEntity.ok("the role of user with id : " + userId + " changed successfully");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        userService.changeRole(userId, role);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("the role of user with id : " + userId + " changed successfully");
     }
 
     @PutMapping(path = "update/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable("userId") Long userId, @Valid UserUpdateRequest userUpdateRequest,BindingResult result ) throws IOException {
+    public ResponseEntity<?> updateUser(@PathVariable("userId") Long userId, @Valid UserUpdateRequest userUpdateRequest, BindingResult result) throws IOException {
         if (result.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-        try{
-            User user = userService.updateUser(userId, userUpdateRequest);
-            return ResponseEntity.ok().body(user);
-        }catch(EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        User user = userService.updateUser(userId, userUpdateRequest);
+        return ResponseEntity.ok().body(user);
     }
 
     @PutMapping(path = "password/{userId}")
@@ -101,26 +86,21 @@ public class UserController {
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-        try {
-            userService.changePassword(userId,passwordRequest);
-            return ResponseEntity.ok("the password has changed successfully ");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }/*catch (UsernameNotFoundException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }*/
+        userService.changePassword(userId, passwordRequest);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("the password has changed successfully ");
     }
 
     //Auth request
 
     @PostMapping("login")
-    public ResponseEntity<?> login(@Valid  LoginRequest loginRequest, BindingResult result) {
+    public ResponseEntity<?> login(@Valid LoginRequest loginRequest, BindingResult result) {
         if (result.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         }
-        return userService.login(loginRequest);
+        UserInfoResponse response = userService.login(loginRequest);
+        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, response.token()).body(response);
     }
 
     @PostMapping(path = "signup")
@@ -128,14 +108,11 @@ public class UserController {
         if (result.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+            throw new RequestValidationException(errors.toString());
         }
-        try {
-            return userService.registerNewUser(signupRequest);
-        } catch ( EntityNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-
+        User user = userService.registerNewUser(signupRequest);
+        return ResponseEntity.ok()
+                .body(user);
     }
 
     @PostMapping(path = "/signout")

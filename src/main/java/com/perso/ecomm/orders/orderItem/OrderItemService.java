@@ -1,5 +1,6 @@
 package com.perso.ecomm.orders.orderItem;
 
+import com.perso.ecomm.exception.ResourceNotFoundException;
 import com.perso.ecomm.product.Product;
 import com.perso.ecomm.product.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,7 +29,7 @@ public class OrderItemService {
 
         // Subtotal will be calculated in the OrderService.
         IntStream.range(0, productIds.size()).forEach(i -> {
-            Product product = productRepository.findById(productIds.get(i)).orElseThrow(() -> new EntityNotFoundException("not found"));
+            Product product = productRepository.findById(productIds.get(i)).orElseThrow(() -> new ResourceNotFoundException("Product with id : %d not found".formatted(i)));
             OrderItem orderItem = new OrderItem();
             product.setStockQuantity(product.getStockQuantity() - 1 );
             orderItem.setProduct(product);

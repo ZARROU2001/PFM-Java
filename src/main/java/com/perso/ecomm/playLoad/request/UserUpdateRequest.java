@@ -11,11 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class UserUpdateRequest {
 
-    @NotNull
-    @Size(min = 3, max = 20,message = "fullName should be more than 3")
-    private String fullName;
+    @Size(min = 3, max = 20,message = "firstName should be more than 3")
+    private String firstName;
 
-    @NotNull
+    @Size(min = 3, max = 20,message = "lastName should be more than 3")
+    private String lastName;
+
     @Size(min = 3, max = 20,message = "username should be more than 3")
     private String username;
 
