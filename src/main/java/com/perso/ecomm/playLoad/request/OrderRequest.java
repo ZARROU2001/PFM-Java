@@ -6,6 +6,7 @@ import java.util.List;
 
 @Getter
 public class OrderRequest {
+
     private Long userId;
 
     private List<Long> productIds;

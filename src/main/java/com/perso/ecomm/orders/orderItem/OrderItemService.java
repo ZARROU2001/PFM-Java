@@ -29,7 +29,7 @@ public class OrderItemService {
 
         // Subtotal will be calculated in the OrderService.
         IntStream.range(0, productIds.size()).forEach(i -> {
-            Product product = productRepository.findById(productIds.get(i)).orElseThrow(() -> new ResourceNotFoundException("Product with id : %d not found".formatted(i)));
+            Product product = productRepository.findById(productIds.get(i)).orElseThrow(() -> new ResourceNotFoundException("Product with id : %d not found".formatted(productIds.get(i))));
             OrderItem orderItem = new OrderItem();
             product.setStockQuantity(product.getStockQuantity() - 1 );
             orderItem.setProduct(product);

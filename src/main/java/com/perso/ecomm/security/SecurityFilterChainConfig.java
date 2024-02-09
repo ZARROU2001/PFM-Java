@@ -39,6 +39,7 @@ public class SecurityFilterChainConfig {
                 .authorizeHttpRequests(
                         (auth) ->
                                 auth
+                                        .requestMatchers("/images/**").permitAll()
                                         .requestMatchers("user/**").permitAll()
                                         .requestMatchers("role/**").permitAll()
                                         .requestMatchers("/error").permitAll()
