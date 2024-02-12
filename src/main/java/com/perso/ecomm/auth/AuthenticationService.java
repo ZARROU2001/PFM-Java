@@ -4,6 +4,7 @@ import com.perso.ecomm.CustomUser.CustomUserDetails;
 import com.perso.ecomm.JWT.JWTUtil;
 import com.perso.ecomm.playLoad.request.LoginRequest;
 import com.perso.ecomm.playLoad.response.UserInfoResponse;
+import com.perso.ecomm.user.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,7 +32,8 @@ public class AuthenticationService {
                 )
         );
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        User user = new User();
         String token = jwtUtil.issueToken(principal.getUsername(),principal.getAuthorities().stream().map(Object::toString).collect(Collectors.toList()));
-        return new UserInfoResponse(token,principal);
+        return new UserInfoResponse(token,user);
     }
 }

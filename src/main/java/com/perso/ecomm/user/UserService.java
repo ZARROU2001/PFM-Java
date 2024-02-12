@@ -98,10 +98,11 @@ public class UserService {
         );
 
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        User user = userRepository.findByEmailOrUsername(principal.getUsername(), principal.getUsername());
         String token = jwtUtil.issueToken(principal.getUsername(), List.of(principal.getAuthorities().toString()));
 
 
-        return new UserInfoResponse(token, principal);
+        return new UserInfoResponse(token, user);
     }
 
     public User registerNewUser(SignupRequest signupRequest) throws IOException {

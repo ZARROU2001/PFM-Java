@@ -5,5 +5,5 @@ import com.perso.ecomm.user.User;
 
 public record UserInfoResponse(
         String token,
-        CustomUserDetails user) {
+        User user) {
 }
