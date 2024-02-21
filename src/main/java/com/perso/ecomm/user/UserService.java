@@ -23,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -174,5 +175,20 @@ public class UserService {
         };
 
         user.setRole(targetRole);
+    }
+
+    public void changePhoto(Long userId, MultipartFile multipartFile) throws IOException {
+
+        User user = userRepository.findById(userId).orElseThrow(
+        );
+
+        String a = "";
+        if (multipartFile != null) {
+            FileUploadUtil.saveFile(FOLDER_PATH, multipartFile.getOriginalFilename(), multipartFile);
+            a = multipartFile.getOriginalFilename();
+        }
+
+        user.setImageUrl("http://localhost:8080/images/users/" + a);
+
     }
 }

@@ -11,9 +11,15 @@
 	<groupId>com.perso</groupId>
 	<artifactId>ecomm</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<organization>
+		<name>azzeddine24</name>
+	</organization>
 	<name>ecomm</name>
 	<description>ecomm small mersh</description>
 	<properties>
+		<docker.username>azzeddine24</docker.username>
+		<docker.image.name>ecomm</docker.image.name>
+		<docker.image.tag/>
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
@@ -83,6 +89,24 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>3.3.2</version>
+				<configuration>
+					<from>
+						<image>eclipse-temurin:17</image>
+					</from>
+					<to>
+						<image>docker.io/${docker.username}/${docker.image.name}:${project.version}</image>
+						<tags>
+							<tag>latest</tag>
+						</tags>
+					</to>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 

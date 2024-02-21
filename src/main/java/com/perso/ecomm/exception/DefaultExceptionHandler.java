@@ -31,6 +31,20 @@ public class DefaultExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ApiError> handleException(
+            InsufficientStockException e,
+            HttpServletRequest request) {
+
+        ApiError apiError = new ApiError(
+                request.getRequestURI(),
+                e.getMessage(),
+                HttpStatus.CONFLICT.value(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ApiError> handleException(
             DuplicateResourceException e,

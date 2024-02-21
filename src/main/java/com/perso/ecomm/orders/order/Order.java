@@ -1,6 +1,5 @@
 package com.perso.ecomm.orders.order;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.perso.ecomm.orders.orderItem.OrderItem;
 import com.perso.ecomm.user.User;
 import jakarta.persistence.*;
@@ -31,6 +30,8 @@ public class Order {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+    private double total;
 
     @CreationTimestamp
     private Date orderDate;

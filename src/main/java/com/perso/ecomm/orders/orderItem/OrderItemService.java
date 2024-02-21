@@ -1,15 +1,14 @@
 package com.perso.ecomm.orders.orderItem;
 
+import com.perso.ecomm.exception.InsufficientStockException;
 import com.perso.ecomm.exception.ResourceNotFoundException;
 import com.perso.ecomm.product.Product;
 import com.perso.ecomm.product.ProductRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 public class OrderItemService {
@@ -24,28 +23,49 @@ public class OrderItemService {
     }
 
     public List<OrderItem> fromProductIdsToListOrderItem(List<Long> productIds, int[] quantities) {
+        // Batch fetch products
+        List<Product> products = productRepository.findAllById(productIds);
+
+        if (products.size() != productIds.size()) {
+            throw new ResourceNotFoundException("One or more products not found.");
+        }
 
         List<OrderItem> orderItems = new ArrayList<>();
 
-        // Subtotal will be calculated in the OrderService.
-        IntStream.range(0, productIds.size()).forEach(i -> {
-            Product product = productRepository.findById(productIds.get(i)).orElseThrow(() -> new ResourceNotFoundException("Product with id : %d not found".formatted(productIds.get(i))));
-            OrderItem orderItem = new OrderItem();
-            product.setStockQuantity(product.getStockQuantity() - 1 );
-            orderItem.setProduct(product);
-            orderItem.setQuantity(quantities[i]);
+        // Populate order items
+        for (int i = 0; i < products.size(); i++) {
+            OrderItem orderItem = getItem(quantities, products, i);
             orderItems.add(orderItem);
-        });
+        }
 
         return orderItems;
+    }
 
+    private static OrderItem getItem(int[] quantities, List<Product> products, int i) {
+        Product product = products.get(i);
+        int quantity = quantities[i];
+
+        if (product.getStockQuantity() < quantity) {
+            throw new InsufficientStockException("Insufficient stock for product with id: " + product.getProductId());
+        }
+
+        OrderItem orderItem = new OrderItem();
+        product.setStockQuantity(product.getStockQuantity() - quantity);
+        orderItem.setProduct(product);
+        orderItem.setQuantity(quantity);
+        orderItem.setSubtotal(product.getPrice() * quantity);
+        return orderItem;
     }
 
     @Transactional
-    public void saveOrderItem(OrderItem orderItem){
+    public void saveOrderItem(OrderItem orderItem) {
 
         orderItemRepository.save(orderItem);
 
     }
 
+    @Transactional
+    public List<OrderItem> saveAllOrderItems(List<OrderItem> orderItems) {
+        return orderItemRepository.saveAll(orderItems);
+    }
 }
