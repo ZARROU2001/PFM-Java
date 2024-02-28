@@ -45,6 +45,16 @@ public class ProductController {
         return productService.getSortedAndPagedData(pageable);
     }
 
+    @GetMapping("/{productId}")
+    public ResponseEntity<?> getProductById(@PathVariable("productId") Long productId) {
+        try {
+            Product product = productService.getProductById(productId);
+            return ResponseEntity.ok(product);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+        }
+    }
+
     @DeleteMapping(path = "/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable("productId") @Valid Long productId) {
             productService.deleteProduct(productId);

@@ -4,10 +4,13 @@ import com.perso.ecomm.exception.ResourceNotFoundException;
 import com.perso.ecomm.orders.orderItem.OrderItem;
 import com.perso.ecomm.orders.orderItem.OrderItemService;
 import com.perso.ecomm.playLoad.request.OrderRequest;
+import com.perso.ecomm.product.Product;
 import com.perso.ecomm.user.User;
 import com.perso.ecomm.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -87,4 +90,7 @@ public class OrderService {
     }
 
 
+    public Page<Order> getSortedAndPagedData(Pageable pageable) {
+        return orderRepository.findAll(pageable);
+    }
 }

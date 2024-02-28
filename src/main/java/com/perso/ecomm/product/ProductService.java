@@ -5,6 +5,7 @@ import com.perso.ecomm.playLoad.request.ProductRequest;
 import com.perso.ecomm.productCategory.ProductCategory;
 import com.perso.ecomm.productCategory.ProductCategoryRepository;
 import com.perso.ecomm.util.FileUploadUtil;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -90,4 +91,9 @@ public class ProductService {
     }
 
 
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product with id " + productId + " not found"));
+
+    }
 }
