@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -88,6 +89,15 @@ public class UserController {
         }
         userService.changePassword(userId, passwordRequest);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("the password has changed successfully ");
+    }
+
+    @PutMapping(path = "changeImage/{userId}")
+    public ResponseEntity<?> changePhoto(
+            @PathVariable Long userId,
+            MultipartFile multipartFile
+    ) throws IOException {
+        userService.changePhoto(userId,multipartFile);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Image updated successfully");
     }
 
     //Auth request

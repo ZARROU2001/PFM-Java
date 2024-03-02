@@ -7,7 +7,6 @@ import com.perso.ecomm.playLoad.request.OrderRequest;
 import com.perso.ecomm.product.Product;
 import com.perso.ecomm.user.User;
 import com.perso.ecomm.user.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,32 +41,37 @@ public class OrderService {
 
     @Transactional
     public Order saveOrder(OrderRequest orderRequest) {
+        // Retrieve user from the database
+        User user = userRepository.findById(orderRequest.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("There's no user with id : " + orderRequest.getUserId()));
 
-        User user = userRepository.findById(orderRequest.getUserId()).orElseThrow(
-                () -> new ResourceNotFoundException("There's no user with id : " + orderRequest.getUserId())
-        );
+        // Convert product ids and quantities to order items
+        List<OrderItem> orderItems = orderItemService.fromProductIdsToListOrderItem(orderRequest.getProductIds(), orderRequest.getQuantities());
 
-        List<OrderItem> orderItems;
-        orderItems = orderItemService.fromProductIdsToListOrderItem(
-                orderRequest.getProductIds(),
-                orderRequest.getQuantities()
-        );
+        // Calculate total
+        double total = orderItems.stream()
+                .mapToDouble(orderItem -> orderItem.getProduct().getPrice() * orderItem.getQuantity())
+                .sum();
 
+        // Create new order
         Order order = new Order();
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
-        orderRepository.save(order);
-
-        for (OrderItem orderItem : orderItems) {
-            orderItem.setOrder(order);
-            orderItem.setSubtotal(orderItem.getProduct().getPrice() * orderItem.getQuantity());
-            orderItemService.saveOrderItem(orderItem);
-        }
-
+        order.setTotal(total);
         order.setOrderItems(orderItems);
+
+        // Set order for each order item
+        orderItems.forEach(orderItem -> orderItem.setOrder(order));
+
+        // Save order items in batch
+        orderItemService.saveAllOrderItems(orderItems);
+
+        // Save the order
+        orderRepository.save(order);
 
         return order;
     }
+
 
     @Transactional
     public Order changeOrderStatus(Long orderId, String orderStatus) {

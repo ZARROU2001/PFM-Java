@@ -32,7 +32,4 @@ public class OrderItem {
     private int quantity;
 
     private double subtotal;
-
-    public OrderItem() {
-    }
 }
