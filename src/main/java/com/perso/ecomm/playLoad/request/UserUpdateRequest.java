@@ -1,7 +1,9 @@
 package com.perso.ecomm.playLoad.request;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;

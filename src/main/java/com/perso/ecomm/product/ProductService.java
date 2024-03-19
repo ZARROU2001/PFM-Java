@@ -78,8 +78,10 @@ public class ProductService {
         product.setPrice(productRequest.getPrice());
         product.setStockQuantity(productRequest.getStockQuantity());
         product.setCategory(productCategory);
-        FileUploadUtil.saveFile(FOLDER_PATH, productRequest.getImageUrl().getOriginalFilename(), productRequest.getImageUrl());
-        product.setImageUrl("http://localhost:8080/images/" + productRequest.getImageUrl().getOriginalFilename());
+        if (productRequest.getImageUrl()!=null){
+            FileUploadUtil.saveFile(FOLDER_PATH, productRequest.getImageUrl().getOriginalFilename(), productRequest.getImageUrl());
+            product.setImageUrl("http://localhost:8080/images/" + productRequest.getImageUrl().getOriginalFilename());
+        }
         return product;
     }
 

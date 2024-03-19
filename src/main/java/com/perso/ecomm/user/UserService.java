@@ -40,7 +40,7 @@ public class UserService {
 
     private final RoleRepository roleRepository;
 
-    final String FOLDER_PATH = "src/main/resources/static/images/users";
+    final String FOLDER_PATH = "src/main/resources/static/images";
 
 
     public UserService(AuthenticationManager authenticationManager, JWTUtil jwtUtil, PasswordEncoder passwordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
@@ -76,8 +76,11 @@ public class UserService {
         user.setEmail(userUpdateRequest.getEmail());
         user.setFirstName(userUpdateRequest.getFirstName());
         user.setLastName(userUpdateRequest.getLastName());
-        FileUploadUtil.saveFile(FOLDER_PATH, userUpdateRequest.getImageUrl().getOriginalFilename(), userUpdateRequest.getImageUrl());
-        user.setImageUrl("http://localhost:8080/images/users/" + userUpdateRequest.getImageUrl().getOriginalFilename());
+        if(userUpdateRequest.getImageUrl() != null){
+            FileUploadUtil.saveFile(FOLDER_PATH, userUpdateRequest.getImageUrl().getOriginalFilename(), userUpdateRequest.getImageUrl());
+            user.setImageUrl("http://localhost:8080/images/" + userUpdateRequest.getImageUrl().getOriginalFilename());
+        }
+
         return user;
     }
 
@@ -126,7 +129,7 @@ public class UserService {
                 signupRequest.getFirstName(),
                 signupRequest.getLastName(),
                 signupRequest.getUsername(),
-                "http://localhost:8080/images/users/" + a);
+                "http://localhost:8080/images/" + a);
 
         String strRoles = signupRequest.getRole();
         Role roles;
@@ -188,7 +191,7 @@ public class UserService {
             a = multipartFile.getOriginalFilename();
         }
 
-        user.setImageUrl("http://localhost:8080/images/users/" + a);
+        user.setImageUrl("http://localhost:8080/images/" + a);
 
     }
 }
