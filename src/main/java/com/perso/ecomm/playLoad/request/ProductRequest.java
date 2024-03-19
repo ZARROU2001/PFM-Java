@@ -17,7 +17,6 @@ public class ProductRequest {
     private String description;
 
 
-    @NotNull
     private MultipartFile imageUrl;
 
     @NotBlank(message = "required field")

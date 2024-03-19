@@ -76,7 +76,7 @@ public class ProductController {
 
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @PutMapping(path = "/{productId}")
     public ResponseEntity<?> updateProduct(
             @PathVariable("productId") Long productId,
