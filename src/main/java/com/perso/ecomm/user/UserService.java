@@ -129,7 +129,8 @@ public class UserService {
                 signupRequest.getFirstName(),
                 signupRequest.getLastName(),
                 signupRequest.getUsername(),
-                "http://localhost:8080/images/" + a);
+                "http://localhost:8080/images/users/default-image.png" + a);
+
 
         String strRoles = signupRequest.getRole();
         Role roles;
