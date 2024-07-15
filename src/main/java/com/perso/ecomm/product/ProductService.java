@@ -31,6 +31,18 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    public List<Product> getProductsByCategory(Long categoryId) {
+        ProductCategory category = productCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return productRepository.findByCategory(category);
+    }
+
+    public Page<Product> getSortedAndPagedProductsByCategory(Long categoryId, Pageable pageable) {
+        ProductCategory productCategory = productCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        return productRepository.findAllByCategory(productCategory, pageable);
+    }
+
     public Page<Product> getSortedAndPagedData(Pageable pageable) {
         return productRepository.findAll(pageable);
     }

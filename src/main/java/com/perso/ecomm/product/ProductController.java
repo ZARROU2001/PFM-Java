@@ -28,11 +28,35 @@ public class ProductController {
         this.productService = productService;
     }
 
+    //get all products
     @GetMapping
     public List<Product> getProducts() {
         return productService.getAllProducts();
     }
 
+    // get products by category
+    @GetMapping("/{categoryId}/products")
+    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable Long categoryId) {
+        List<Product> products = productService.getProductsByCategory(categoryId);
+        return ResponseEntity.ok(products);
+    }
+
+    // get sortable, pageable products by category
+    @GetMapping("/{categoryId}/paginate")
+    public ResponseEntity<Page<Product>> getProductsByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            @RequestParam(name = "sortField", defaultValue = "productId") String sortField,
+            @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder) {
+
+        Sort.Direction direction = sortOrder.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, direction, sortField);
+        Page<Product> products = productService.getSortedAndPagedProductsByCategory(categoryId, pageable);
+        return ResponseEntity.ok(products);
+    }
+
+    // get all sortable, pageable products
     // @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/paginate")
     public Page<Product> paginateProduct(
@@ -45,6 +69,7 @@ public class ProductController {
         return productService.getSortedAndPagedData(pageable);
     }
 
+    // get product by its id
     @GetMapping("/{productId}")
     public ResponseEntity<?> getProductById(@PathVariable("productId") Long productId) {
         try {
@@ -75,7 +100,6 @@ public class ProductController {
 
 
     }
-
 
     @PutMapping(path = "/{productId}")
     public ResponseEntity<?> updateProduct(

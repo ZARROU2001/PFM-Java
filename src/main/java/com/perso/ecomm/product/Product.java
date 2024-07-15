@@ -1,5 +1,6 @@
 package com.perso.ecomm.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.perso.ecomm.productCategory.ProductCategory;
 import jakarta.persistence.*;
 import jakarta.persistence.ForeignKey;
@@ -7,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.*;
+
 
 import java.util.Date;
 
@@ -23,6 +25,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "category_id",foreignKey = @ForeignKey(name = "fk_product_category"))
+    @JsonIgnore
     private ProductCategory category;
 
     @Size(min = 2, message = "at least 2 character")
@@ -58,4 +61,6 @@ public class Product {
         this.stockQuantity = stockQuantity;
         this.imageUrl = image;
     }
+
+
 }
