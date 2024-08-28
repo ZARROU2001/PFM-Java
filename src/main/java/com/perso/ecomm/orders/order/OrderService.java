@@ -50,7 +50,7 @@ public class OrderService {
 
         // Calculate total
         double total = orderItems.stream()
-                .mapToDouble(orderItem -> orderItem.getProduct().getPrice() * orderItem.getQuantity())
+                .mapToDouble(orderItem -> orderItem.getProduct().getPriceAfterDiscount() * orderItem.getQuantity())
                 .sum();
 
         // Create new order

@@ -28,7 +28,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    //get all products
+    // get all products
     @GetMapping
     public List<Product> getProducts() {
         return productService.getAllProducts();
@@ -80,6 +80,20 @@ public class ProductController {
         }
     }
 
+    // Get latest products
+    @GetMapping("/latest-products")
+    public ResponseEntity<List<Product>> getLatestProducts() {
+        List<Product> products = productService.getLatestProducts();
+        return ResponseEntity.ok(products);
+    }
+
+    //Get Hot Deals
+    @GetMapping("/hot-deals")
+    public ResponseEntity<List<Product>> getHotDeals() {
+        List<Product> products = productService.getHotDealsProducts();
+        return ResponseEntity.ok(products);
+    }
+
     @DeleteMapping(path = "/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable("productId") @Valid Long productId) {
             productService.deleteProduct(productId);
@@ -97,7 +111,6 @@ public class ProductController {
         }
             Product a = productService.registerNewProduct(productRequest);
             return ResponseEntity.ok(a);
-
 
     }
 

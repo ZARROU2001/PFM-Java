@@ -35,7 +35,11 @@ public class Product {
     private String description;
 
     @DecimalMin(value = "0.01",message = "should be a number")
-    private double price;
+    private double priceAfterDiscount;
+
+    private double priceBeforeDiscount;
+
+    private double discountPercent;
 
     @Min(value = 0, message = "stock should more than or equal 0")
     private int stockQuantity;
@@ -53,11 +57,12 @@ public class Product {
 
     }
 
-    public Product(ProductCategory category, String name, String description, double price, int stockQuantity, String image) {
+    public Product(ProductCategory category, String name, String description, double priceAfterDiscount , double priceBeforeDiscount, int stockQuantity, String image) {
         this.category = category;
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.priceAfterDiscount = priceAfterDiscount;
+        this.priceBeforeDiscount=priceBeforeDiscount;
         this.stockQuantity = stockQuantity;
         this.imageUrl = image;
     }

@@ -8,6 +8,7 @@ import com.perso.ecomm.util.FileUploadUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,18 @@ public class ProductService {
         return productRepository.findAll(pageable);
     }
 
+
+    // get latest products
+    public List<Product> getLatestProducts() {
+        Pageable pageable = PageRequest.of(0, 10);  // Fetching the latest 10 products
+        return productRepository.findLatestByCreationDateDesc(pageable);
+    }
+
+    //get hot deals
+    public List<Product> getHotDealsProducts() {
+        return productRepository.findByDiscountPercentGreaterThan(45);
+    }
+
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product with ID + categoryId + not found"));
@@ -61,15 +74,19 @@ public class ProductService {
 
         FileUploadUtil.saveFile(FOLDER_PATH, productRequest.getImageUrl().getOriginalFilename(), productRequest.getImageUrl());
 
+        double discountPercent = calculateDiscountPercent(productRequest.getPriceBeforeDiscount(), productRequest.getPriceAfterDiscount());
+
         Product product = new Product(
                 productCategory,
                 productRequest.getName(),
                 productRequest.getDescription(),
-                productRequest.getPrice(),
+                productRequest.getPriceAfterDiscount(),
+                productRequest.getPriceBeforeDiscount(),
                 productRequest.getStockQuantity(),
                 "http://localhost:8080/images/" + productRequest.getImageUrl().getOriginalFilename()
         );
 
+        product.setDiscountPercent(discountPercent);
         productRepository.save(product);
 
         return product;
@@ -78,16 +95,15 @@ public class ProductService {
     @Transactional
     public Product updateProduct(Long productId, ProductRequest productRequest) throws IOException {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        " product with id " + productId + " doesn't exist "));
+                .orElseThrow(() -> new ResourceNotFoundException( " product with id " + productId + " doesn't exist "));
 
         ProductCategory productCategory = productCategoryRepository.findProductCategoriesByCategoryName(productRequest.getCategory())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not Found"));
 
-
         product.setName(productRequest.getName());
         product.setDescription(productRequest.getDescription());
-        product.setPrice(productRequest.getPrice());
+        product.setPriceAfterDiscount(productRequest.getPriceAfterDiscount());
+        product.setPriceBeforeDiscount(productRequest.getPriceBeforeDiscount());
         product.setStockQuantity(productRequest.getStockQuantity());
         product.setCategory(productCategory);
         if (productRequest.getImageUrl()!=null){
@@ -108,6 +124,14 @@ public class ProductService {
     public Product getProductById(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product with id " + productId + " not found"));
-
     }
+
+    public double calculateDiscountPercent(double priceBeforeDiscount, double priceAfterDiscount) {
+        if (priceBeforeDiscount > 0 && priceBeforeDiscount <= priceAfterDiscount) {
+            throw new IllegalArgumentException("Price before discount must be greater than Price After discount");
+        }
+        double discount = ((priceBeforeDiscount - priceAfterDiscount) / priceBeforeDiscount) * 100;
+        return (int) Math.round(discount);
+    }
+
 }

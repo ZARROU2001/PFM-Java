@@ -53,7 +53,7 @@ public class OrderItemService {
         product.setStockQuantity(product.getStockQuantity() - quantity);
         orderItem.setProduct(product);
         orderItem.setQuantity(quantity);
-        orderItem.setSubtotal(product.getPrice() * quantity);
+        orderItem.setSubtotal(product.getPriceAfterDiscount() * quantity);
         return orderItem;
     }
 

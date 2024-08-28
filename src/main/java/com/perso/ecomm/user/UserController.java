@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +52,7 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size, direction, sortField);
         return userService.getSortedAndPagedData(pageable);
     }
-
+    
     @DeleteMapping(path = "{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable("userId") Long userId) {
         userService.deleteUser(userId);
@@ -59,6 +60,8 @@ public class UserController {
 
     }
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(path = "change_role/{userId}")
     public ResponseEntity<?> changeRoleOfUser(@PathVariable Long userId, String role) {
         userService.changeRole(userId, role);
