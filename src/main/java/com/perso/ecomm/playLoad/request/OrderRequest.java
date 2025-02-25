@@ -7,10 +7,11 @@ import java.util.List;
 @Getter
 public class OrderRequest {
 
-    private Long userId;
-
+    private Long userId;  // Nullable for guest orders
+    private String guestName;  // Required if guest
+    private String guestEmail; // Optional if guest
     private List<Long> productIds;
+    private List<Integer> quantities;
 
-    private int[] quantities;
-
+    // Getters and Setters
 }

@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -28,7 +29,6 @@ public class ProductController {
         this.productService = productService;
     }
 
-    // get all products
     @GetMapping
     public List<Product> getProducts() {
         return productService.getAllProducts();
@@ -57,7 +57,6 @@ public class ProductController {
     }
 
     // get all sortable, pageable products
-    // @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/paginate")
     public Page<Product> paginateProduct(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -94,13 +93,14 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(path = "/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable("productId") @Valid Long productId) {
             productService.deleteProduct(productId);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Product deleted successfully");
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<?> createNewProduct(@Valid ProductRequest productRequest, BindingResult result) throws IOException {
 
@@ -114,6 +114,7 @@ public class ProductController {
 
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(path = "/{productId}")
     public ResponseEntity<?> updateProduct(
             @PathVariable("productId") Long productId,
@@ -130,10 +131,17 @@ public class ProductController {
 
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
-    @GetMapping(path = "img/{id}")
-    public byte[] getPhoto(@PathVariable("id") Long id) throws Exception {
+    @GetMapping("/{id}/image")
+    public ResponseEntity<byte[]> getProductImage(@PathVariable Long id) {
+        try {
+            byte[] imageBytes = productService.getImage(id);
+            if (imageBytes == null) {
+                return ResponseEntity.notFound().build();
+            }
 
-        return productService.getImage(id);
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

@@ -18,7 +18,7 @@ public class ProductRequest {
 
     private MultipartFile imageUrl;
 
-    @NotBlank(message = "required field")
+    @NotBlank
     private String category;
 
     @DecimalMin(value = "0.01",message = "should be a number")

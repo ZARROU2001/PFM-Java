@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,6 +20,9 @@ public interface  ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findLatestByCreationDateDesc(Pageable pageable);
 
     List<Product> findByDiscountPercentGreaterThan(double discountPercent);
+
+    @Query("SELECT p.name, p.stockQuantity FROM Product p WHERE p.stockQuantity < :threshold")
+    List<Object[]> getLowStockProducts(@Param("threshold") int threshold);
 
 
 //    @Query("SELECT p FROM Product p ORDER BY p.discountPercent DESC")

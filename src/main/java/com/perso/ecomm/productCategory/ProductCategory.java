@@ -1,15 +1,15 @@
 package com.perso.ecomm.productCategory;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.perso.ecomm.product.Product;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -25,6 +25,7 @@ public class ProductCategory {
     private Long categoryId;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Product> product;
 
     @Column(nullable = false,unique = true)
@@ -33,5 +34,9 @@ public class ProductCategory {
 
     public ProductCategory() {
 
+    }
+
+    public ProductCategory(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

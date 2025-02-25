@@ -1,12 +1,14 @@
 package com.perso.ecomm.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.perso.ecomm.productCategory.ProductCategory;
 import jakarta.persistence.*;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.*;
 
 
@@ -17,7 +19,6 @@ import java.util.Date;
 @Getter
 @Setter
 @AllArgsConstructor
-@ToString
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +26,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "category_id",foreignKey = @ForeignKey(name = "fk_product_category"))
+    @JsonManagedReference
     @JsonIgnore
     private ProductCategory category;
 
@@ -68,4 +70,20 @@ public class Product {
     }
 
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "productId=" + productId +
+                ", category=" + category.getCategoryName() +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", priceAfterDiscount=" + priceAfterDiscount +
+                ", priceBeforeDiscount=" + priceBeforeDiscount +
+                ", discountPercent=" + discountPercent +
+                ", stockQuantity=" + stockQuantity +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", creationDate=" + creationDate +
+                ", lastUpdate=" + lastUpdate +
+                '}';
+    }
 }

@@ -4,7 +4,7 @@ import com.perso.ecomm.exception.ResourceNotFoundException;
 import com.perso.ecomm.playLoad.request.ProductRequest;
 import com.perso.ecomm.productCategory.ProductCategory;
 import com.perso.ecomm.productCategory.ProductCategoryRepository;
-import com.perso.ecomm.util.FileUploadUtil;
+import com.perso.ecomm.util.ImageStorageService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -12,9 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 @Service
@@ -22,10 +20,12 @@ public class ProductService {
     final String FOLDER_PATH = "src/main/resources/static/images/";
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
+    private final ImageStorageService imageStorageService;
 
-    public ProductService(ProductRepository productRepository, ProductCategoryRepository productCategoryRepository) {
+    public ProductService(ProductRepository productRepository, ProductCategoryRepository productCategoryRepository, ImageStorageService imageStorageService) {
         this.productRepository = productRepository;
         this.productCategoryRepository = productCategoryRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     public List<Product> getAllProducts() {
@@ -68,13 +68,14 @@ public class ProductService {
     }
 
     public Product registerNewProduct(ProductRequest productRequest) throws IOException {
-
         ProductCategory productCategory = productCategoryRepository.findProductCategoriesByCategoryName(productRequest.getCategory())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not Found"));
 
-        FileUploadUtil.saveFile(FOLDER_PATH, productRequest.getImageUrl().getOriginalFilename(), productRequest.getImageUrl());
-
         double discountPercent = calculateDiscountPercent(productRequest.getPriceBeforeDiscount(), productRequest.getPriceAfterDiscount());
+
+        String imageUrl = (productRequest.getImageUrl() != null && !productRequest.getImageUrl().isEmpty())
+                ? imageStorageService.saveImage(productRequest.getName(), productRequest.getImageUrl())
+                : null;
 
         Product product = new Product(
                 productCategory,
@@ -83,7 +84,7 @@ public class ProductService {
                 productRequest.getPriceAfterDiscount(),
                 productRequest.getPriceBeforeDiscount(),
                 productRequest.getStockQuantity(),
-                "http://localhost:8080/images/" + productRequest.getImageUrl().getOriginalFilename()
+                imageUrl
         );
 
         product.setDiscountPercent(discountPercent);
@@ -95,29 +96,27 @@ public class ProductService {
     @Transactional
     public Product updateProduct(Long productId, ProductRequest productRequest) throws IOException {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException( " product with id " + productId + " doesn't exist "));
-
-        ProductCategory productCategory = productCategoryRepository.findProductCategoriesByCategoryName(productRequest.getCategory())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product with id " + productId + " doesn't exist"));
 
         product.setName(productRequest.getName());
         product.setDescription(productRequest.getDescription());
         product.setPriceAfterDiscount(productRequest.getPriceAfterDiscount());
         product.setPriceBeforeDiscount(productRequest.getPriceBeforeDiscount());
         product.setStockQuantity(productRequest.getStockQuantity());
-        product.setCategory(productCategory);
-        if (productRequest.getImageUrl()!=null){
-            FileUploadUtil.saveFile(FOLDER_PATH, productRequest.getImageUrl().getOriginalFilename(), productRequest.getImageUrl());
-            product.setImageUrl("http://localhost:8080/images/" + productRequest.getImageUrl().getOriginalFilename());
+
+        if (productRequest.getImageUrl() != null && !productRequest.getImageUrl().isEmpty()) {
+            String imageUrl = imageStorageService.saveImage(productRequest.getName(), productRequest.getImageUrl());
+            product.setImageUrl(imageUrl);
         }
+
         return product;
     }
 
     public byte[] getImage(Long id) throws IOException {
-        Product product = productRepository.findById(id).get();
-        String filePath = FOLDER_PATH + product.getImageUrl();
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product with id " + id + " not found"));
 
-        return Files.readAllBytes(new File(filePath).toPath());
+        return imageStorageService.loadImage(product.getImageUrl());
     }
 
 

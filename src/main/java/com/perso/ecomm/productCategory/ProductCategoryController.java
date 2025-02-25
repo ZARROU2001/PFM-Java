@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,7 @@ public class ProductCategoryController {
         return productCategoryService.getAllCategories();
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
+
     @GetMapping("/paginate")
     public Page<ProductCategory> paginateCategories(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -43,6 +44,7 @@ public class ProductCategoryController {
         return productCategoryService.getSortedAndPagedData(pageable);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<?> addNewCategory(@Valid ProductCategory productCategory, BindingResult result) {
         if (result.hasErrors()) {
@@ -55,12 +57,14 @@ public class ProductCategoryController {
 
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<?> deleteCategory(@PathVariable("categoryId") @Valid Long categoryId) {
             productCategoryService.deleteCategory(categoryId);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Product category deleted successfully");
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{categoryId}")
     public ResponseEntity<?> updateCategory(
             @PathVariable("categoryId") @Valid Long categoryId,

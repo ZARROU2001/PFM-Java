@@ -13,19 +13,22 @@ public class CustomUserDetails implements UserDetails {
 
     private final User user;
 
-
     public CustomUserDetails(User user) {
         this.user = user;
     }
 
-    public String getEmail(){
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getEmail() {
         return user.getEmail();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Role roles = user.getRole();
-        return Collections.singleton(new SimpleGrantedAuthority(roles.getName().name()));
+        Role role = user.getRole();
+        return Collections.singleton(new SimpleGrantedAuthority(role.getName().name())); // Map roles to authorities
     }
 
     @Override

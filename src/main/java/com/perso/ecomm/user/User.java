@@ -4,10 +4,12 @@ package com.perso.ecomm.user;
 import com.perso.ecomm.role.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 
+@Setter
+@Getter
 @Entity(name = "users")
 @Table(
         uniqueConstraints = {
@@ -17,28 +19,26 @@ import lombok.Setter;
                 )
         }
 )
-@Getter
-@Setter
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String firstName;
 
-    @Column(nullable = false)
+    @Column
     private String lastName;
 
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -46,7 +46,6 @@ public class User {
     private Role role;
 
     private String imageUrl;
-
 
     public User(
             String email,
@@ -62,4 +61,5 @@ public class User {
         this.password = password;
         this.imageUrl = imageUrl;
     }
+
 }

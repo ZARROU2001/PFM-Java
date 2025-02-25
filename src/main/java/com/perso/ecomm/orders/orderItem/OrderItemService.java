@@ -22,7 +22,7 @@ public class OrderItemService {
         this.productRepository = productRepository;
     }
 
-    public List<OrderItem> fromProductIdsToListOrderItem(List<Long> productIds, int[] quantities) {
+    public List<OrderItem> fromProductIdsToListOrderItem(List<Long> productIds, List<Integer> quantities) {
         // Batch fetch products
         List<Product> products = productRepository.findAllById(productIds);
 
@@ -41,9 +41,9 @@ public class OrderItemService {
         return orderItems;
     }
 
-    private static OrderItem getItem(int[] quantities, List<Product> products, int i) {
+    private static OrderItem getItem(List<Integer> quantities, List<Product> products, int i) {
         Product product = products.get(i);
-        int quantity = quantities[i];
+        int quantity = quantities.get(i);
 
         if (product.getStockQuantity() < quantity) {
             throw new InsufficientStockException("Insufficient stock for product with id: " + product.getProductId());
@@ -65,7 +65,7 @@ public class OrderItemService {
     }
 
     @Transactional
-    public List<OrderItem> saveAllOrderItems(List<OrderItem> orderItems) {
-        return orderItemRepository.saveAll(orderItems);
+    public void saveAllOrderItems(List<OrderItem> orderItems) {
+        orderItemRepository.saveAll(orderItems);
     }
 }

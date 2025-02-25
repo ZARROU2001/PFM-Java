@@ -7,6 +7,7 @@ import com.perso.ecomm.playLoad.request.OrderRequest;
 import com.perso.ecomm.product.Product;
 import com.perso.ecomm.user.User;
 import com.perso.ecomm.user.UserRepository;
+import com.perso.ecomm.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,13 +20,13 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemService orderItemService;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
 
-    public OrderService(OrderRepository orderRepository, OrderItemService orderItemService, UserRepository userRepository) {
+    public OrderService(OrderRepository orderRepository, OrderItemService orderItemService, UserService userService) {
         this.orderRepository = orderRepository;
         this.orderItemService = orderItemService;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<Order> getAllOrders() {
@@ -41,21 +42,21 @@ public class OrderService {
 
     @Transactional
     public Order saveOrder(OrderRequest orderRequest) {
-        // Retrieve user from the database
-        User user = userRepository.findById(orderRequest.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("There's no user with id : " + orderRequest.getUserId()));
+        // Retrieve or create user (authenticated or guest)
+        User user = userService.getUserForOrder(orderRequest);
 
         // Convert product ids and quantities to order items
-        List<OrderItem> orderItems = orderItemService.fromProductIdsToListOrderItem(orderRequest.getProductIds(), orderRequest.getQuantities());
+        List<OrderItem> orderItems = orderItemService.fromProductIdsToListOrderItem(
+                orderRequest.getProductIds(),
+                orderRequest.getQuantities()
+        );
 
         // Calculate total
-        double total = orderItems.stream()
-                .mapToDouble(orderItem -> orderItem.getProduct().getPriceAfterDiscount() * orderItem.getQuantity())
-                .sum();
+        double total = calculateTotal(orderItems);
 
         // Create new order
         Order order = new Order();
-        order.setUser(user);
+        order.setUser(user);  // Associate user (authenticated or guest)
         order.setStatus(OrderStatus.PENDING);
         order.setTotal(total);
         order.setOrderItems(orderItems);
@@ -63,13 +64,17 @@ public class OrderService {
         // Set order for each order item
         orderItems.forEach(orderItem -> orderItem.setOrder(order));
 
-        // Save order items in batch
+        // Save order items and order
         orderItemService.saveAllOrderItems(orderItems);
-
-        // Save the order
         orderRepository.save(order);
 
         return order;
+    }
+
+    private double calculateTotal(List<OrderItem> orderItems) {
+        return orderItems.stream()
+                .mapToDouble(orderItem -> orderItem.getProduct().getPriceAfterDiscount() * orderItem.getQuantity())
+                .sum();
     }
 
 
